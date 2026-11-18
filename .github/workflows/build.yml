@@ -1,0 +1,61 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pdf:
+    name: Typeset the book
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pandoc, LuaLaTeX and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-luatex \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            fonts-dejavu-core \
+            fonts-noto-core \
+            fontconfig \
+            curl ca-certificates
+
+      - name: Install pandoc 3
+        run: |
+          curl -fsSL -o /tmp/pandoc.deb \
+            https://github.com/jgm/pandoc/releases/download/3.14/pandoc-3.14-1-amd64.deb
+          sudo dpkg -i /tmp/pandoc.deb
+
+      - name: Check the toolchain
+        run: python3 tools/build.py --check
+
+      - name: Build the PDF
+        run: python3 tools/build.py
+
+      - name: Upload the PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: software-design-and-craftsmanship
+          path: Software Design & Craftsmanship.pdf
+          if-no-files-found: error
+
+  examples:
+    name: Type-check the examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install --no-audit --no-fund
+      - run: python3 tools/check_code.py

@@ -1,0 +1,13 @@
+{
+  "name": "software-design-and-craftsmanship",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The source of the book Software Design & Craftsmanship",
+  "scripts": {
+    "check": "python3 tools/check_code.py",
+    "build": "python3 tools/build.py"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
